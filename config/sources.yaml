@@ -1,0 +1,39 @@
+﻿general_tech:
+  - name: TechCrunch
+    rss: https://techcrunch.com/feed/
+    weight: 1.0
+  - name: The Verge
+    rss: https://www.theverge.com/rss/index.xml
+    weight: 0.9
+  - name: Engadget
+    rss: https://www.engadget.com/rss.xml
+    weight: 0.8
+
+ai:
+  - name: MIT Technology Review
+    rss: https://www.technologyreview.com/feed/
+    weight: 1.0
+  - name: VentureBeat AI
+    rss: https://venturebeat.com/category/ai/feed/
+    weight: 0.9
+
+smartphones:
+  - name: GSMArena
+    rss: https://www.gsmarena.com/rss-news-reviews.php3
+    weight: 1.0
+  - name: Android Authority
+    rss: https://www.androidauthority.com/feed
+    weight: 0.9
+
+companies:
+  - name: Google Blog
+    rss: https://blog.google/rss/
+    weight: 1.0
+  - name: Microsoft Blog
+    rss: https://blogs.microsoft.com/feed/
+    weight: 0.9
+
+gaming:
+  - name: IGN
+    rss: https://feeds.ign.com/ign/all
+    weight: 0.9
