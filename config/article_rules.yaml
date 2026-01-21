@@ -1,0 +1,47 @@
+﻿article:
+  minimum_word_count: 700
+  language: en
+  tone:
+    - neutral
+    - analytical
+    - factual
+
+seo:
+  title:
+    max_length: 70
+    must_contain_primary_keyword: true
+  meta_description:
+    required: true
+    min_length: 120
+    max_length: 160
+  headings:
+    h2_as_questions: true
+    minimum_h2_count: 3
+
+eeat:
+  author_box: required
+  analysis_section: required
+  sources:
+    minimum_count: 2
+    allow_primary_sources_only: true
+  disclaimer: required
+
+content_quality:
+  duplication_threshold_percent: 30
+  requires_original_analysis: true
+  forbidden_patterns:
+    - "This article discusses"
+    - "In today's world"
+    - "As we all know"
+
+structure:
+  required_sections:
+    - introduction
+    - analysis
+    - implications
+    - key_takeaways
+    - conclusion
+
+internal_linking:
+  minimum_links: 2
+  same_topic_only: true
