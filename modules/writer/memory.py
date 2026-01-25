@@ -1,46 +1,67 @@
 # modules/writer/memory.py
 
+import json
+from pathlib import Path
+from datetime import datetime, UTC
 from typing import List
-from collections import Counter
-from datetime import datetime, timedelta
+
+
+MEMORY_PATH = Path("data/memory.json")
+MEMORY_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
 class ArticleMemory:
     """
-    Persistent-like short-term editorial memory.
+    Persistent editorial memory with backward-safe schema.
     """
 
-    def __init__(self, max_items: int = 30, window_hours: int = 72):
+    def __init__(self, max_items: int = 50):
         self.max_items = max_items
-        self.window = timedelta(hours=window_hours)
+        self.data = self._load_and_upgrade()
 
-        self.recent_titles: List[str] = []
-        self.recent_angles: List[str] = []
-        self.timestamps: List[datetime] = []
+    def _load_and_upgrade(self) -> dict:
+        if MEMORY_PATH.exists():
+            data = json.loads(MEMORY_PATH.read_text(encoding="utf-8"))
+        else:
+            data = {}
 
-    def _trim(self):
-        if len(self.recent_titles) > self.max_items:
-            self.recent_titles = self.recent_titles[-self.max_items :]
-            self.recent_angles = self.recent_angles[-self.max_items :]
-            self.timestamps = self.timestamps[-self.max_items :]
+        # ---- Schema upgrade (backward compatible) ----
+        data.setdefault("titles", [])
+        data.setdefault("angles", [])
+        data.setdefault("authors", [])
+        data.setdefault("last_updated", None)
 
-    def remember_titles(self, titles: List[str]) -> None:
-        now = datetime.utcnow()
-        for t in titles:
-            if t and t not in self.recent_titles:
-                self.recent_titles.append(t)
-                self.timestamps.append(now)
-        self._trim()
+        return data
 
-    def remember_angle(self, angle: str) -> None:
-        self.recent_angles.append(angle)
-        self._trim()
+    def _save(self) -> None:
+        self.data["last_updated"] = datetime.now(UTC).isoformat()
+        MEMORY_PATH.write_text(
+            json.dumps(self.data, indent=2),
+            encoding="utf-8",
+        )
 
-    def has_seen(self, title: str) -> bool:
-        return title in self.recent_titles
+    def _append(self, key: str, value: str) -> None:
+        if value and value not in self.data[key]:
+            self.data[key].append(value)
 
-    def angle_ratio(self, angle: str) -> float:
-        if not self.recent_angles:
+        # Trim history
+        self.data[key] = self.data[key][-self.max_items :]
+
+    # -------- Public API --------
+
+    def remember(self, *, title: str, angle: str, author: str) -> None:
+        self._append("titles", title)
+        self._append("angles", angle)
+        self._append("authors", author)
+        self._save()
+
+    def has_seen_title(self, title: str) -> bool:
+        return title in self.data["titles"]
+
+    def angle_usage_ratio(self, angle: str) -> float:
+        if not self.data["angles"]:
             return 0.0
-        counts = Counter(self.recent_angles)
-        return counts.get(angle, 0) / len(self.recent_angles)
+        return self.data["angles"].count(angle) / len(self.data["angles"])
+
+    def recent_authors(self) -> List[str]:
+        return list(self.data["authors"])
