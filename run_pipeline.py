@@ -14,9 +14,10 @@ from modules.publisher.blogger_publisher import BloggerPublisher
 # =========================
 # CONFIG
 # =========================
-BLOG_ID = "7570751768424346777"
-DRY_RUN = False            # True = no publish, False = publish to Blogger
+BLOG_ID = "7570751768424346777"  # Blogger Blog ID
+DRY_RUN = False                # True = build only, False = publish
 MAX_ATTEMPTS = 5
+MIN_WORDS_AFTER_REWRITE = 700
 
 DATA_DIR = Path("data/drafts")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -34,39 +35,38 @@ def slugify(text: str) -> str:
 
 
 def main():
-    validator = DraftValidator()
     publisher = BloggerPublisher(BLOG_ID)
+    validator = DraftValidator()
     rewriter = ArticleRewriter()
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         print(f"\nATTEMPT {attempt}/{MAX_ATTEMPTS}")
 
-        # 1. Fetch + select
+        # 1. Fetch & select news
         items = fetch_all()
         selected = select_news(items)
 
-        # 2. Build article
+        # 2. Build base article (700+ words guaranteed)
         article = build_article(selected[:3])
 
-        # 3. Rewrite (remove repetition, keep length)
-        article["content"] = rewriter._rewrite_text(
-            section_name="full_article",
-            text=article["content"],
-            angle=article.get("angle", "industry_trend"),
+        # 3. Rewrite article SECTIONS (safe rewrite)
+        article["content"] = rewriter.rewrite_article_sections(
+            article["content"],
+            min_words=MIN_WORDS_AFTER_REWRITE,
         )
 
-        # 4. Validate
+        # 4. Validate final article
         decision = validator.decide(article)
         print(f"DECISION: {decision['decision']}")
 
-        if decision["reasons"]:
+        if decision.get("reasons"):
             for r in decision["reasons"]:
                 print(f"- {r}")
 
         if decision["decision"] != DraftDecision.PUBLISH:
             continue
 
-        # 5. Save local draft (always)
+        # 5. Save local draft
         date_str = datetime.now(UTC).strftime("%Y-%m-%d")
         filename = f"{date_str}-{slugify(article['title'])}.html"
         output_path = DATA_DIR / filename
@@ -80,6 +80,7 @@ def main():
             print("PUBLISHED TO BLOGGER")
             print("URL:", result.get("url"))
 
+        # 7. Final log
         print("Saved:", output_path)
         print("Title:", article["title"])
         print("Angle:", article.get("angle"))
