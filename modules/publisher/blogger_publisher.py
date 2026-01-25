@@ -23,11 +23,6 @@ class BloggerPublisher:
         return build("blogger", "v3", credentials=creds)
 
     def publish(self, article: dict) -> dict:
-        """
-        Publish article dict to Blogger.
-        Expected keys: title, content
-        """
-
         body = {
             "kind": "blogger#post",
             "title": article["title"],
@@ -36,7 +31,11 @@ class BloggerPublisher:
 
         post = (
             self.service.posts()
-            .insert(blogId=self.blog_id, body=body, isDraft=False)
+            .insert(
+                blogId=self.blog_id,
+                body=body,
+                isDraft=False,
+            )
             .execute()
         )
 
