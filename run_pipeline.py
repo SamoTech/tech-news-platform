@@ -1,3 +1,5 @@
+# run_pipeline.py
+
 from pathlib import Path
 from datetime import datetime, UTC
 
@@ -9,8 +11,11 @@ from modules.validator.draft_validator import DraftValidator, DraftDecision
 from modules.publisher.blogger_publisher import BloggerPublisher
 
 
+# =========================
+# CONFIG
+# =========================
 BLOG_ID = "7570751768424346777"
-DRY_RUN = False
+DRY_RUN = False            # True = no publish, False = publish to Blogger
 MAX_ATTEMPTS = 5
 
 DATA_DIR = Path("data/drafts")
@@ -29,20 +34,28 @@ def slugify(text: str) -> str:
 
 
 def main():
-    publisher = BloggerPublisher(BLOG_ID)
     validator = DraftValidator()
+    publisher = BloggerPublisher(BLOG_ID)
     rewriter = ArticleRewriter()
 
     for attempt in range(1, MAX_ATTEMPTS + 1):
         print(f"\nATTEMPT {attempt}/{MAX_ATTEMPTS}")
 
+        # 1. Fetch + select
         items = fetch_all()
         selected = select_news(items)
+
+        # 2. Build article
         article = build_article(selected[:3])
 
-        # 🔁 Rewrite before validation & publishing
-        article["content"] = rewriter.rewrite(article["content"])
+        # 3. Rewrite (remove repetition, keep length)
+        article["content"] = rewriter._rewrite_text(
+            section_name="full_article",
+            text=article["content"],
+            angle=article.get("angle", "industry_trend"),
+        )
 
+        # 4. Validate
         decision = validator.decide(article)
         print(f"DECISION: {decision['decision']}")
 
@@ -53,11 +66,13 @@ def main():
         if decision["decision"] != DraftDecision.PUBLISH:
             continue
 
+        # 5. Save local draft (always)
         date_str = datetime.now(UTC).strftime("%Y-%m-%d")
         filename = f"{date_str}-{slugify(article['title'])}.html"
         output_path = DATA_DIR / filename
         output_path.write_text(article["content"], encoding="utf-8")
 
+        # 6. Publish
         if DRY_RUN:
             print("DRY RUN — NOT PUBLISHED")
         else:
@@ -70,6 +85,7 @@ def main():
         print("Angle:", article.get("angle"))
         print("Word count:", len(article["content"].split()))
         print("Meta:", article["meta_description"][:120])
+
         return
 
     print("\nFAILED: No publishable article after max attempts")
