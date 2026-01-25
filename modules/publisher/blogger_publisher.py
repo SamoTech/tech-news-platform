@@ -4,7 +4,6 @@ import os
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
-
 SCOPES = ["https://www.googleapis.com/auth/blogger"]
 
 
@@ -14,11 +13,6 @@ class BloggerPublisher:
         self.service = self._authenticate()
 
     def _authenticate(self):
-        """
-        CI-safe OAuth authentication using refresh token.
-        No browser, no InstalledAppFlow.
-        """
-
         creds = Credentials(
             token=None,
             refresh_token=os.environ["BLOGGER_REFRESH_TOKEN"],
@@ -43,5 +37,4 @@ class BloggerPublisher:
             isDraft=False,
         )
 
-        response = request.execute()
-        return response
+        return request.execute()
