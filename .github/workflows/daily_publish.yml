@@ -39,6 +39,7 @@ jobs:
 
       - name: Run publishing pipeline
         env:
+        OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           BLOGGER_BLOG_ID: ${{ secrets.BLOGGER_BLOG_ID }}
           BLOGGER_CLIENT_ID: ${{ secrets.BLOGGER_CLIENT_ID }}
           BLOGGER_CLIENT_SECRET: ${{ secrets.BLOGGER_CLIENT_SECRET }}
