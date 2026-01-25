@@ -1,21 +1,39 @@
+# modules/writer/angles.py
+
 import random
+from typing import List, Dict
+
 
 ANGLES = [
-    "user_impact",
+    "strategic_shift",
     "market_signal",
-    "competition",
-    "timing",
-    "strategy"
+    "user_impact",
+    "industry_trend",
+    "long_term_implication"
 ]
 
-ANGLE_PHRASES = {
-    "user_impact": "From a user perspective, the real impact may become visible sooner than expected.",
-    "market_signal": "Viewed as a market signal, this move reflects shifting priorities across the industry.",
-    "competition": "In the context of competition, this development could pressure rivals to respond.",
-    "timing": "The timing of this announcement is notable given current market conditions.",
-    "strategy": "Strategically, this suggests a longer-term plan rather than a short-term reaction."
-}
 
-def pick_angle():
-    angle = random.choice(ANGLES)
-    return angle, ANGLE_PHRASES[angle]
+def choose_angle(items: List[Dict]) -> str:
+    """
+    Select an editorial angle based on the nature of the news items.
+    This is intentionally deterministic-light to keep articles human-like.
+    """
+
+    if not items:
+        return "industry_trend"
+
+    titles = " ".join(item.get("title", "").lower() for item in items)
+
+    if any(k in titles for k in ["regulation", "policy", "law", "ban"]):
+        return "strategic_shift"
+
+    if any(k in titles for k in ["funding", "raises", "investment", "acquisition"]):
+        return "market_signal"
+
+    if any(k in titles for k in ["user", "consumer", "customer", "feature"]):
+        return "user_impact"
+
+    if any(k in titles for k in ["2026", "future", "next", "roadmap"]):
+        return "long_term_implication"
+
+    return random.choice(ANGLES)

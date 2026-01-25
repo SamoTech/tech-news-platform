@@ -1,39 +1,30 @@
-﻿general_tech:
-  - name: TechCrunch
-    rss: https://techcrunch.com/feed/
-    weight: 1.0
-  - name: The Verge
-    rss: https://www.theverge.com/rss/index.xml
-    weight: 0.9
-  - name: Engadget
-    rss: https://www.engadget.com/rss.xml
-    weight: 0.8
+﻿sources:
+  mit:
+    url: https://news.mit.edu/rss/topic/artificial-intelligence
+    authority: 0.95
+    category: research
 
-ai:
-  - name: MIT Technology Review
-    rss: https://www.technologyreview.com/feed/
-    weight: 1.0
-  - name: VentureBeat AI
-    rss: https://venturebeat.com/category/ai/feed/
-    weight: 0.9
+  google:
+    url: https://blog.google/technology/ai/rss
+    authority: 0.90
+    category: industry
 
-smartphones:
-  - name: GSMArena
-    rss: https://www.gsmarena.com/rss-news-reviews.php3
-    weight: 1.0
-  - name: Android Authority
-    rss: https://www.androidauthority.com/feed
-    weight: 0.9
+  microsoft:
+    url: https://www.microsoft.com/en-us/research/feed/
+    authority: 0.92
+    category: research
 
-companies:
-  - name: Google Blog
-    rss: https://blog.google/rss/
-    weight: 1.0
-  - name: Microsoft Blog
-    rss: https://blogs.microsoft.com/feed/
-    weight: 0.9
+  techcrunch:
+    url: https://techcrunch.com/feed/
+    authority: 0.75
+    category: news
 
-gaming:
-  - name: IGN
-    rss: https://feeds.ign.com/ign/all
-    weight: 0.9
+  wired:
+    url: https://www.wired.com/feed/rss
+    authority: 0.78
+    category: analysis
+
+  reddit_ai:
+    url: https://www.reddit.com/r/artificial/.rss
+    authority: 0.40
+    category: community

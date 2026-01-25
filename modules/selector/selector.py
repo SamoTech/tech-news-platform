@@ -1,43 +1,78 @@
-from collections import defaultdict
+# modules/selector/selector.py
+
 import random
+from collections import defaultdict
+from typing import List, Dict
+
 
 TARGET_TOTAL = 45
+CATEGORY_QUOTA = 5
 
-CATEGORY_QUOTA = {
-    "ai": 10,
-    "smartphones": 10,
-    "companies": 10,
-    "gaming": 5,
-    "general_tech": 10
-}
 
-def group_by_category(items):
+def _score_item(item: Dict) -> float:
+    """
+    Calculate a weighted editorial score for each news item.
+    """
+
+    base = 1.0
+
+    authority = float(item.get("source_authority", 0.5))
+    base *= authority * 2  # authority is dominant factor
+
+    title = item.get("title", "").lower()
+
+    # Boost for analysis-worthy keywords
+    if any(k in title for k in ["regulation", "policy", "security", "ai", "privacy"]):
+        base += 0.6
+
+    if any(k in title for k in ["raises", "funding", "acquires", "ipo"]):
+        base += 0.4
+
+    # Penalize fluff / low-signal
+    if any(k in title for k in ["review", "hands-on", "leak", "rumor"]):
+        base -= 0.5
+
+    return max(base, 0.1)
+
+
+def select_news(items: List[Dict]) -> List[Dict]:
+    """
+    Select a balanced, authority-weighted set of news items.
+    """
+
+    if not items:
+        return []
+
+    # Attach score
+    for item in items:
+        item["weight"] = _score_item(item)
+
+    # Group by category
     grouped = defaultdict(list)
     for item in items:
-        grouped[item["category"]].append(item)
-    return grouped
+        grouped[item.get("category", "unknown")].append(item)
 
-def weighted_shuffle(items):
-    return sorted(items, key=lambda x: random.random() * (1 / item_weight(x)))
+    selected: List[Dict] = []
 
-def item_weight(item):
-    return item.get("weight", 1.0)
-
-def select_news(items):
-    grouped = group_by_category(items)
-    selected = []
-
-    for category, quota in CATEGORY_QUOTA.items():
-        pool = grouped.get(category, [])
-        if not pool:
+    # Category-first selection
+    for category, bucket in grouped.items():
+        if not bucket:
             continue
 
-        shuffled = weighted_shuffle(pool)
-        selected.extend(shuffled[:quota])
+        bucket = sorted(bucket, key=lambda x: x["weight"], reverse=True)
 
+        take = min(CATEGORY_QUOTA, len(bucket))
+        selected.extend(bucket[:take])
+
+    # Fill remaining slots globally
     if len(selected) < TARGET_TOTAL:
         remaining = [i for i in items if i not in selected]
-        remaining = weighted_shuffle(remaining)
-        selected.extend(remaining[:TARGET_TOTAL - len(selected)])
+        remaining = sorted(remaining, key=lambda x: x["weight"], reverse=True)
 
-    return selected[:TARGET_TOTAL]
+        needed = TARGET_TOTAL - len(selected)
+        selected.extend(remaining[:needed])
+
+    # Final shuffle (light)
+    random.shuffle(selected)
+
+    return selected

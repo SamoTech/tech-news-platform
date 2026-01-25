@@ -1,51 +1,50 @@
+# modules/fetcher/rss_fetch.py
+
 import feedparser
 import yaml
-from datetime import datetime, timedelta
+from pathlib import Path
+from typing import List, Dict
 
-MAX_AGE_HOURS = 48
 
-def load_sources(path="config/sources.yaml"):
-    with open(path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+SOURCES_PATH = Path("config/sources.yaml")
 
-def is_fresh(entry):
-    published = getattr(entry, "published_parsed", None)
-    if not published:
-        return False
-    published_dt = datetime(*published[:6])
-    return datetime.utcnow() - published_dt <= timedelta(hours=MAX_AGE_HOURS)
 
-def fetch_feed(source_name, rss_url, category, weight):
-    feed = feedparser.parse(rss_url)
-    items = []
+def _load_sources() -> Dict:
+    if not SOURCES_PATH.exists():
+        raise FileNotFoundError("sources.yaml not found in config/")
 
-    for entry in feed.entries:
-        if not is_fresh(entry):
-            continue
+    with open(SOURCES_PATH, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
 
-        items.append({
-            "title": entry.get("title", "").strip(),
-            "link": entry.get("link", "").strip(),
-            "summary": entry.get("summary", "").strip(),
-            "category": category,
-            "source": source_name,
-            "weight": weight
-        })
+    return data.get("sources", {})
 
-    return items
 
-def fetch_all():
-    sources = load_sources()
-    all_items = []
+def fetch_all() -> List[Dict]:
+    """
+    Fetch RSS items from configured sources and attach authority metadata.
+    """
 
-    for category, feeds in sources.items():
-        for feed in feeds:
-            items = fetch_feed(
-                feed["name"],
-                feed["rss"],
-                category,
-                feed["weight"]
-            )
-            all_items.extend(items)
+    sources = _load_sources()
+    all_items: List[Dict] = []
+
+    for source_id, meta in sources.items():
+        url = meta["url"]
+        authority = float(meta.get("authority", 0.5))
+        category = meta.get("category", "unknown")
+
+        feed = feedparser.parse(url)
+
+        for entry in feed.entries:
+            item = {
+                "title": entry.get("title", "").strip(),
+                "link": entry.get("link", "").strip(),
+                "summary": entry.get("summary", "").strip(),
+                "category": category,
+                "source": source_id,
+                "source_authority": authority,
+            }
+
+            if item["title"] and item["link"]:
+                all_items.append(item)
 
     return all_items

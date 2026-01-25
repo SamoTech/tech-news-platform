@@ -1,35 +1,54 @@
-INTRO_TEMPLATES = [
-    "Technology rarely moves in isolation, and recent developments make that clearer than ever.",
-    "The tech industry continues to evolve rapidly, and the latest updates reflect a broader shift.",
-    "At first glance, these announcements may seem routine, but their implications go deeper."
-]
+# modules/writer/templates.py
 
-ANALYSIS_TEMPLATES = [
-    "From a strategic perspective, this move signals a calculated long-term direction.",
-    "What stands out most is not the announcement itself, but the timing behind it.",
-    "This development highlights how competitive pressure is reshaping the market."
-]
+from typing import Dict
+from datetime import datetime
+from html import escape
 
-OPINION_TEMPLATES = [
-    "In practical terms, users are likely to feel the impact sooner than expected.",
-    "There are clear advantages here, although some concerns remain unresolved.",
-    "Overall, this appears to be a measured and deliberate decision."
-]
 
-TRANSITION_TEMPLATES = [
-    "Meanwhile, another development adds further context to the bigger picture.",
-    "On a different front, a separate announcement drew industry attention.",
-    "At the same time, related news suggests a wider trend is forming."
-]
+def render_article(
+    title: str,
+    sections: Dict[str, str],
+    angle: str,
+    author: str = "GlobalTechDigest Editorial Team",
+    date: str | None = None,
+) -> str:
+    """
+    Render a full HTML article using structured sections.
+    This is the single authoritative HTML layout for the platform.
+    """
 
-PREDICTION_TEMPLATES = [
-    "Looking ahead, similar initiatives are likely to follow across the industry.",
-    "Over the coming months, this approach could become more common.",
-    "If current trends continue, the market may adjust faster than expected."
-]
+    date = date or datetime.utcnow().strftime("%B %d, %Y")
 
-CONCLUSION_TEMPLATES = [
-    "Taken together, these updates underline how quickly the sector is changing.",
-    "Ultimately, these stories point toward a broader transformation underway.",
-    "The coming weeks will reveal how meaningful these changes truly are."
-]
+    def section_html(section_id: str, heading: str, body: str) -> str:
+        return f"""
+  <section id="{escape(section_id)}">
+    <h2>{escape(heading)}</h2>
+    <p>{body}</p>
+  </section>
+"""
+
+    html = f"""<article>
+  <header>
+    <h1>{escape(title)}</h1>
+    <p><em>By {escape(author)} • {escape(date)}</em></p>
+  </header>
+"""
+
+    # Mandatory EEAT / AdSense-safe structure
+    ordered_sections = [
+        ("introduction", "Introduction"),
+        ("analysis", "Analysis"),
+        ("implications", "Implications"),
+        ("key_takeaways", "Key Takeaways"),
+        ("conclusion", "Conclusion"),
+    ]
+
+    for key, heading in ordered_sections:
+        content = sections.get(key)
+        if content:
+            html += section_html(key, heading, content)
+
+    html += """
+</article>
+"""
+    return html.strip()
