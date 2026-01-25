@@ -4,8 +4,6 @@ import os
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 
-SCOPES = ["https://www.googleapis.com/auth/blogger"]
-
 
 class BloggerPublisher:
     def __init__(self, blog_id: str):
@@ -19,22 +17,30 @@ class BloggerPublisher:
             token_uri="https://oauth2.googleapis.com/token",
             client_id=os.environ["BLOGGER_CLIENT_ID"],
             client_secret=os.environ["BLOGGER_CLIENT_SECRET"],
-            scopes=SCOPES,
+            scopes=["https://www.googleapis.com/auth/blogger"],
         )
 
         return build("blogger", "v3", credentials=creds)
 
-    def publish(self, title: str, html_content: str):
-        post = {
+    def publish(self, article: dict) -> dict:
+        """
+        Publish a prepared article dict to Blogger.
+        Expected keys: title, content, meta_description, angle
+        """
+
+        post_body = {
             "kind": "blogger#post",
-            "title": title,
-            "content": html_content,
+            "title": article["title"],
+            "content": article["content"],
         }
 
-        request = self.service.posts().insert(
-            blogId=self.blog_id,
-            body=post,
-            isDraft=False,
+        post = (
+            self.service.posts()
+            .insert(blogId=self.blog_id, body=post_body, isDraft=False)
+            .execute()
         )
 
-        return request.execute()
+        return {
+            "post_id": post.get("id"),
+            "url": post.get("url"),
+        }
