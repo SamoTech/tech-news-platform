@@ -14,17 +14,15 @@ from modules.writer.authors import select_author
 
 class ContentGenerator:
     """
-    Generate high-quality, original articles using LLM with actual source content.
+    Generate high-quality articles using Google Gemini (FREE).
     """
 
     def __init__(self):
-        self.api_key = os.getenv("OPENROUTER_API_KEY")
+        self.api_key = os.getenv("GEMINI_API_KEY")
         if not self.api_key:
-            raise RuntimeError("OPENROUTER_API_KEY not set")
+            raise RuntimeError("GEMINI_API_KEY not set")
 
-        self.endpoint = "https://openrouter.ai/api/v1/chat/completions"
-        # Use a stronger model for better content
-        self.model = "anthropic/claude-3.5-sonnet"
+        self.endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
 
     def generate_section(
         self,
@@ -37,155 +35,159 @@ class ContentGenerator:
         Generate a single article section with real analysis.
         """
 
-        # Build context from actual news items
         sources_context = self._build_sources_context(items)
 
-        prompts = {
-            "introduction": f"""Write a compelling introduction for a tech news article.
+        system_prompt = """You are an expert technology journalist and analyst.
+Write clear, insightful, specific content.
+Avoid generic business jargon and repetitive phrases.
+Focus on facts, technical details, and strategic implications.
+Write in a professional, analytical tone."""
 
-ANGLE: {angle}
+        prompts = {
+            "introduction": f"""{system_prompt}
+
+Write a compelling introduction for a tech news article.
+
+EDITORIAL ANGLE: {angle}
 NEWS SOURCES:
 {sources_context}
 
-Requirements:
+REQUIREMENTS:
 - {word_target} words minimum
-- Hook the reader immediately
-- Mention the key development concretely
-- Set up the analysis to follow
-- Be specific, not generic
+- Hook the reader immediately with the most important development
+- Mention specific companies, products, or technologies
+- Explain why this matters NOW
+- Be concrete, not generic
 - NO phrases like "Recent developments indicate" or "In today's world"
 
-Write only the paragraph content, no labels.""",
+Write ONLY the introduction paragraph. No labels, no titles.""",
 
-            "analysis": f"""Provide deep technical and strategic analysis of these developments.
+            "analysis": f"""{system_prompt}
 
-ANGLE: {angle}
+Provide deep technical and strategic analysis.
+
+EDITORIAL ANGLE: {angle}
 NEWS SOURCES:
 {sources_context}
 
-Requirements:
+REQUIREMENTS:
 - {word_target} words minimum
-- Compare and contrast the different sources
-- Identify patterns and connections
-- Discuss technical implications
-- Be specific with examples
-- Show expertise and insight
+- Compare and contrast different sources
+- Identify technical patterns and strategic decisions
+- Discuss implementation details and architecture
+- Include specific examples and data points
+- Show technical expertise
 
-Write only the paragraph content, no labels.""",
+Write ONLY the analysis paragraph. No labels, no titles.""",
 
-            "implications": f"""Analyze the broader implications of these developments.
+            "implications": f"""{system_prompt}
 
-ANGLE: {angle}
+Analyze the broader implications of these developments.
+
+EDITORIAL ANGLE: {angle}
 NEWS SOURCES:
 {sources_context}
 
-Requirements:
+REQUIREMENTS:
 - {word_target} words minimum
-- Who is affected and how?
-- Market/industry impact
-- User/developer consequences
-- Competitive dynamics
+- WHO is affected: companies, users, developers, competitors
+- HOW they're affected: market dynamics, product strategies
 - Be concrete and actionable
+- Include specific business implications
+- Mention specific stakeholders by name
 
-Write only the paragraph content, no labels.""",
+Write ONLY the implications paragraph. No labels, no titles.""",
 
-            "key_takeaways": f"""Synthesize the key takeaways readers should remember.
+            "key_takeaways": f"""{system_prompt}
 
-ANGLE: {angle}
+Synthesize 3-4 key takeaways readers should remember.
+
+EDITORIAL ANGLE: {angle}
 NEWS SOURCES:
 {sources_context}
 
-Requirements:
+REQUIREMENTS:
 - {word_target} words minimum
-- 3-4 distinct insights
-- Actionable understanding
-- Strategic clarity
+- 3-4 distinct insights (not a list)
+- Each insight must be unique and non-overlapping
+- Strategic clarity and actionable understanding
 - Avoid generic business speak
+- Write as flowing paragraphs, not bullet points
 
-Write only the paragraph content, no labels.""",
+Write ONLY the key takeaways paragraph. No labels, no titles.""",
 
-            "conclusion": f"""Write a forward-looking conclusion that ties everything together.
+            "conclusion": f"""{system_prompt}
 
-ANGLE: {angle}
+Write a forward-looking conclusion.
+
+EDITORIAL ANGLE: {angle}
 NEWS SOURCES:
 {sources_context}
 
-Requirements:
+REQUIREMENTS:
 - {word_target} words minimum
-- Synthesize the main thread
-- Future outlook
-- Final strategic insight
-- Strong closing
+- Future outlook and strategic direction
+- What this signals about industry evolution
+- Final insight that ties everything together
+- Strong, memorable closing
+- Do NOT repeat earlier sections
 
-Write only the paragraph content, no labels."""
+Write ONLY the conclusion paragraph. No labels, no titles."""
         }
 
         prompt = prompts.get(section_name, prompts["analysis"])
-
-        return self._call_llm(prompt)
+        return self._call_gemini(prompt)
 
     def _build_sources_context(self, items: List[Dict]) -> str:
-        """
-        Build a structured context from source articles.
-        """
+        """Build context from source articles."""
         context = []
         for i, item in enumerate(items[:5], 1):
             context.append(f"""
 Source {i}:
 Title: {item.get('title', 'N/A')}
-Summary: {item.get('summary', 'N/A')[:300]}
+Summary: {item.get('summary', 'N/A')[:400]}
 Authority: {item.get('source_authority', 0.5)}
 Category: {item.get('category', 'N/A')}
 """)
         return "\n".join(context)
 
-    def _call_llm(self, prompt: str, max_retries: int = 3) -> str:
-        """
-        Call OpenRouter API with retry logic.
-        """
+    def _call_gemini(self, prompt: str, max_retries: int = 3) -> str:
+        """Call Google Gemini API."""
+        
+        url = f"{self.endpoint}?key={self.api_key}"
+        
         payload = {
-            "model": self.model,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are an expert technology journalist and analyst. Write clear, insightful, specific content. Avoid generic business jargon and repetitive phrases."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            "temperature": 0.7,
-            "max_tokens": 800,
-        }
-
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }],
+            "generationConfig": {
+                "temperature": 0.7,
+                "topK": 40,
+                "topP": 0.95,
+                "maxOutputTokens": 800,
+            }
         }
 
         for attempt in range(max_retries):
             try:
-                r = requests.post(
-                    self.endpoint,
-                    json=payload,
-                    headers=headers,
-                    timeout=60
-                )
-                r.raise_for_status()
+                response = requests.post(url, json=payload, timeout=60)
+                response.raise_for_status()
                 
-                content = r.json()["choices"][0]["message"]["content"].strip()
+                data = response.json()
                 
-                # Clean up any potential labels or formatting
-                content = content.replace("Introduction:", "").replace("Analysis:", "")
-                content = content.replace("Implications:", "").replace("Conclusion:", "")
-                content = content.strip()
-                
-                return content
+                # Extract text from Gemini response
+                if "candidates" in data and len(data["candidates"]) > 0:
+                    content = data["candidates"][0]["content"]["parts"][0]["text"]
+                    content = content.strip()
+                    return content
+                else:
+                    raise RuntimeError("No content in Gemini response")
 
             except Exception as e:
                 if attempt == max_retries - 1:
-                    raise RuntimeError(f"LLM API failed after {max_retries} attempts: {e}")
+                    raise RuntimeError(f"Gemini API failed after {max_retries} attempts: {e}")
                 continue
 
         return ""
@@ -216,7 +218,7 @@ def build_article(items: List[Dict]) -> Dict[str, str]:
         allow_extended=True,
     )
 
-    # Generate each section with real content
+    # Generate each section
     print("Generating introduction...")
     sections = {
         "introduction": generator.generate_section("introduction", items, angle, 150),
@@ -247,9 +249,8 @@ def build_article(items: List[Dict]) -> Dict[str, str]:
     violations = rules.validate_article(article_html)
     if violations:
         print(f"WARNING: Article has violations: {violations}")
-        # Don't raise - let validator decide
 
-    # Create meta description from introduction
+    # Create meta description
     meta_desc = sections["introduction"][:160].rsplit(" ", 1)[0] + "..."
 
     # Remember this article
@@ -259,7 +260,7 @@ def build_article(items: List[Dict]) -> Dict[str, str]:
         author=author["name"],
     )
 
-    # Calculate final word count
+    # Calculate word count
     word_count = len(article_html.split())
 
     return {
