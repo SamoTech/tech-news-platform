@@ -1,6 +1,7 @@
 # modules/writer/article_builder.py
 
 import os
+import time
 import requests
 from datetime import datetime
 from typing import List, Dict
@@ -14,7 +15,7 @@ from modules.writer.authors import select_author
 
 class ContentGenerator:
     """
-    Generate high-quality articles using Google Gemini (FREE).
+    Generate high-quality articles using Google Gemini (FREE with rate limiting).
     """
 
     def __init__(self):
@@ -152,7 +153,9 @@ Category: {item.get('category', 'N/A')}
         return "\n".join(context)
 
     def _call_gemini(self, prompt: str, max_retries: int = 3) -> str:
-        """Call Google Gemini API."""
+        """
+        Call Google Gemini API with rate limiting.
+        """
         
         url = f"{self.endpoint}?key={self.api_key}"
         
@@ -172,6 +175,11 @@ Category: {item.get('category', 'N/A')}
 
         for attempt in range(max_retries):
             try:
+                # RATE LIMITING: Wait 5 seconds between requests
+                if attempt > 0:
+                    print(f"  Retry {attempt}/{max_retries}...")
+                time.sleep(5)  # Respect Gemini free tier limits
+                
                 response = requests.post(url, json=payload, timeout=60)
                 response.raise_for_status()
                 
@@ -188,6 +196,7 @@ Category: {item.get('category', 'N/A')}
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise RuntimeError(f"Gemini API failed after {max_retries} attempts: {e}")
+                print(f"  Error: {e}, retrying...")
                 continue
 
         return ""
@@ -218,7 +227,7 @@ def build_article(items: List[Dict]) -> Dict[str, str]:
         allow_extended=True,
     )
 
-    # Generate each section
+    # Generate each section with rate limiting
     print("Generating introduction...")
     sections = {
         "introduction": generator.generate_section("introduction", items, angle, 150),
