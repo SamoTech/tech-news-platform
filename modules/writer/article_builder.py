@@ -178,7 +178,7 @@ Category: {item.get('category', 'N/A')}
                 # RATE LIMITING: Wait 5 seconds between requests
                 if attempt > 0:
                     print(f"  Retry {attempt}/{max_retries}...")
-                time.sleep(5)  # Respect Gemini free tier limits
+                time.sleep(10)  # Respect Gemini free tier limits (6 requests/min max)
                 
                 response = requests.post(url, json=payload, timeout=60)
                 response.raise_for_status()
