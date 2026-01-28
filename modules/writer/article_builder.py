@@ -24,9 +24,9 @@ class ContentGenerator:
         if not self.api_key:
             raise RuntimeError("GEMINI_API_KEY not set")
 
-        # Using gemini-1.5-flash-8b for higher rate limits
-        # Alternative: gemini-2.0-flash or gemini-1.5-flash
-        self.endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent"
+        # Using gemini-2.5-flash-lite (available January 2026, fast and free)
+        # Alternative: gemini-2.5-flash or gemini-1.5-flash
+        self.endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
 
     def generate_full_article(self, items: List[Dict], angle: str) -> Dict[str, str]:
         """
@@ -173,7 +173,7 @@ Category: {item.get('category', 'N/A')}
                     time.sleep(5)
                 else:
                     # Exponential backoff for retries
-                    wait_time = base_wait * (2 ** (attempt - 1))  # 15, 30, 60 seconds
+                    wait_time = base_wait * (2 ** (attempt - 1))  # 15, 30 seconds
                     print(f"  Retry {attempt}/{max_retries} after {wait_time}s...")
                     time.sleep(wait_time)
                 
@@ -199,7 +199,7 @@ Category: {item.get('category', 'N/A')}
                 if e.response.status_code == 429:
                     if attempt < max_retries - 1:
                         # Longer wait for rate limits
-                        wait_time = 60 * (2 ** attempt)  # 60, 120, 240 seconds
+                        wait_time = 60 * (2 ** attempt)  # 60, 120 seconds
                         print(f"  Rate limit hit (429). Waiting {wait_time}s before retry...")
                         time.sleep(wait_time)
                         continue
