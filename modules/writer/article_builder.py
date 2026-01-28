@@ -23,7 +23,7 @@ class ContentGenerator:
         if not self.api_key:
             raise RuntimeError("GEMINI_API_KEY not set")
 
-        self.endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
+        self.endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
     def generate_section(
         self,
