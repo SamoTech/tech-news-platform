@@ -1,15 +1,12 @@
 # Tech News Platform
 
+<p align="center"><img src="https://raw.githubusercontent.com/SamoTech/tech-news-platform/master/docs/assets/banner.svg" alt="Tech News Platform banner" width="900"/></p>
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.9+-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![Made with GitHub Actions](https://img.shields.io/badge/Made%20with-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](https://github.com/features/actions)
 [![Deployment Status](https://img.shields.io/badge/Deployment-Active-success?logo=vercel)](https://tech-news-platform-two.vercel.app)
 [![Live Dashboard](https://img.shields.io/badge/Live-Dashboard-blue?logo=blogger&logoColor=white)](https://tech-news-platform-two.vercel.app)
-[![GitHub Stars](https://img.shields.io/github/stars/SamoTech/tech-news-platform?style=social)](https://github.com/SamoTech/tech-news-platform/stargazers)
-[![Follow on GitHub](https://img.shields.io/github/followers/SamoTech?label=Follow&style=social)](https://github.com/SamoTech)
-[![Twitter Follow](https://img.shields.io/twitter/follow/OssamaHashim?style=social)](https://twitter.com/OssamaHashim)
-[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor-❤-pink?logo=github-sponsors)](https://github.com/sponsors/SamoTech)
-[![Visitors](https://visitor-badge.laobi.icu/badge?page_id=SamoTech.tech-news-platform)](https://github.com/SamoTech/tech-news-platform)
 
 > 🤖 Automated global tech news platform powered by AI - 100% automated content generation, human-like editorial quality, AdSense-ready monetization platform.
 
@@ -19,7 +16,6 @@
 
 ## ✨ Features
 
-### Core Capabilities
 - 🤖 **100% Automated** - Zero manual intervention required
 - ✍️ **Human-like Editorial Content** - AI-generated articles with natural language
 - 💰 **AdSense-Ready** - Monetization-optimized layout and content structure
@@ -29,236 +25,40 @@
 - 📈 **SEO Optimized** - Search engine friendly content and structure
 - ⏰ **Scheduled Updates** - Automatic content generation on schedule
 
-### Technical Features
-- 🔄 **CI/CD Pipeline** - Automated testing and deployment
-- 🛡️ **Rate Limiting** - Built-in API rate limit protection
-- 📄 **Content Management** - Automated content curation and posting
-- 🎯 **Quality Control** - AI-powered content validation
-
 ---
 
 ## 🛠️ Tech Stack
 
-### Backend & Automation
 - **Python 3.9+** - Core programming language
 - **GitHub Actions** - Workflow automation and scheduling
 - **Blogger API** - Content publishing platform
-- **AI/ML Integration** - Automated content generation
-
-### Deployment
-- **Vercel** - Frontend hosting and deployment
-- **GitHub** - Version control and CI/CD
-- **Blogger** - Content delivery platform
+- **Vercel** - Frontend hosting
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
 ```bash
-Python 3.9+
-GitHub Account
-Blogger Account
-Google Cloud API Credentials
-```
-
-### Installation
-
-```bash
-# Clone the repository
 git clone https://github.com/SamoTech/tech-news-platform.git
 cd tech-news-platform
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Configure environment variables
 cp .env.example .env
-# Edit .env with your API keys
-
-# Run locally
 python main.py
 ```
 
-### Environment Variables
-
-```bash
-# Blogger API Configuration
-BLOGGER_API_KEY=your_blogger_api_key
-BLOG_ID=your_blog_id
-
-# Content Generation
-AI_API_KEY=your_ai_api_key
-
-# Optional
-UPDATE_FREQUENCY=daily  # daily, hourly, custom
-```
-
 ---
 
-## 📚 Documentation
+## 📄 License
 
-### Automated Workflow
-
-1. **Content Discovery** - AI scans trending tech topics
-2. **Content Generation** - Creates human-like articles
-3. **Quality Check** - Validates content quality and SEO
-4. **Publishing** - Automatically posts to Blogger
-5. **Monitoring** - Tracks performance and engagement
-
-### GitHub Actions Workflow
-
-The platform uses GitHub Actions for automation:
-
-```yaml
-name: Auto Update Tech News
-on:
-  schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
-  workflow_dispatch:  # Manual trigger
-
-jobs:
-  generate-content:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Generate and Publish
-        run: python generate_news.py
-```
+MIT © [SamoTech](https://github.com/SamoTech)
 
 ---
-
-## 📊 Performance & Metrics
-
-- **Uptime**: 99.9%
-- **Content Generation**: Automated
-- **Update Frequency**: Every 6 hours
-- **Average Article Quality**: Human-like
-- **SEO Score**: Optimized
-
----
-
-## 🛡️ Rate Limiting
-
-The platform implements intelligent rate limiting:
-- API calls are throttled to prevent quota exhaustion
-- Exponential backoff on failures
-- Automatic retry mechanism
-- Daily and hourly limits respected
-
----
-
-## 📝 Project Structure
-
-```
-tech-news-platform/
-├── .github/
-│   └── workflows/           # GitHub Actions workflows
-├── src/
-│   ├── content/           # Content generation modules
-│   ├── publishers/        # Publishing integrations
-│   └── utils/             # Utility functions
-├── config/                 # Configuration files
-├── requirements.txt        # Python dependencies
-├── main.py                 # Main application
-└── README.md               # Documentation
-```
-
----
-
-## ⚙️ Configuration
-
-### Content Settings
-
-```python
-# config/content_settings.py
-CONTENT_CONFIG = {
-    'min_words': 500,
-    'max_words': 1500,
-    'topics': ['AI', 'Cloud', 'Cybersecurity', 'Web Development'],
-    'tone': 'professional',
-    'language': 'en'
-}
-```
-
-### Publishing Schedule
-
-- **Daily Updates**: 4x per day (every 6 hours)
-- **Peak Times**: Aligned with global tech news cycles
-- **Off-peak**: Reduced frequency during weekends
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! To contribute:
-
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** changes: `git commit -m 'Add amazing feature'`
-4. **Push** to branch: `git push origin feature/amazing-feature`
-5. **Open** a Pull Request
-
-### Development Guidelines
-
-- Follow PEP 8 style guide
-- Add tests for new features
-- Update documentation
-- Ensure all tests pass
-
----
-
-## 📜 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-## 👨‍💻 Author
-
-**Ossama Hashim** (SamoTech)
-
-- 🌐 GitHub: [@SamoTech](https://github.com/SamoTech)
-- 📧 Email: samo.hossam@gmail.com
-- 🐦 Twitter: [@OssamaHashim](https://twitter.com/OssamaHashim)
-- 💼 LinkedIn: [Ossama Hashim](https://www.linkedin.com/in/ossamahashim/)
-- 📍 Location: Cairo, Egypt
-
----
-
-## ⭐ Show Your Support
-
-If this project helped you:
-
-- ⭐ **Star** this repository
-- 🐛 **Report** bugs and issues
-- 💡 **Suggest** new features
-- 🤝 **Contribute** to the codebase
-- 📢 **Share** with others
-
----
-
-## 🤝 Connect & Support
 
 <div align="center">
 
 [![GitHub](https://img.shields.io/badge/GitHub-SamoTech-181717?style=for-the-badge&logo=github)](https://github.com/SamoTech)
-[![Twitter](https://img.shields.io/badge/Twitter-@OssamaHashim-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/OssamaHashim)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ossama_Hashim-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ossamahashim/)
-[![Email](https://img.shields.io/badge/Email-samo.hossam@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:samo.hossam@gmail.com)
-[![Facebook](https://img.shields.io/badge/Facebook-Connect-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://facebook.com/ossamahashim)
+[![Sponsor](https://img.shields.io/badge/Sponsor-❤-EA4AAA?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/SamoTech)
 
-### 💖 Support this Project
-
-[![Sponsor on GitHub](https://img.shields.io/badge/Sponsor_on_GitHub-❤-EA4AAA?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/SamoTech)
-[![PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/ossamahashim)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_A_Coffee-Support-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/ossamahashim)
-
-**Made with ❤️ in Cairo - Automated Tech News for Everyone**
+**Made with ❤️ in Cairo**
 
 </div>
-
----
-
-**🚀 Automated. Intelligent. Always Fresh.**
